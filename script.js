@@ -108,6 +108,7 @@ function removerUsuario(nome) {
 }
 
 // ---- ADMIN: EXIBIR TODOS PEDIDOS ----
+// ---- ADMIN: EXIBIR TODOS PEDIDOS ----
 function exibirTodosPedidos() {
   const div = document.getElementById("todosPedidos");
   const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
@@ -118,40 +119,61 @@ function exibirTodosPedidos() {
     return;
   }
 
-  pedidos.forEach((p, i) => {
+  // Ordenar pedidos do mais recente para o mais antigo
+  const pedidosOrdenados = [...pedidos].reverse();
+
+  pedidosOrdenados.forEach((pedido, index) => {
     const pedidoCard = document.createElement("div");
     pedidoCard.className = "pedido-card fade-in";
     
-    // Montar lista de produtos
-    const produtosLista = p.produtos.map(prod => {
-      return `
-        <div class="produto-item">
-          <strong>${prod.nome}</strong><br>
-          ${prod.quantidade}kg × R$${prod.preco.toFixed(2)} = R$${prod.subtotal.toFixed(2)}
-        </div>
-      `;
-    }).join("");
+    // Formatar a lista de produtos
+    const produtosLista = pedido.produtos.map(prod => `
+      <div class="produto-item">
+        <strong>${prod.nome}</strong><br>
+        ${prod.quantidade}kg × R$${prod.preco.toFixed(2)} = R$${prod.subtotal.toFixed(2)}
+      </div>
+    `).join("");
+
+    // Formatar data (se necessário)
+    const dataFormatada = formatarDataParaExibicao(pedido.data);
 
     pedidoCard.innerHTML = `
-      <h4>Pedido #${i + 1}</h4>
-      <p><strong>Cliente:</strong> ${p.cliente}</p>
-      <p><strong>Endereço:</strong> ${p.endereco}</p>
-      <p><strong>Vendedor:</strong> ${p.usuario}</p>
+      <h4>Pedido #${pedidos.length - index}</h4>
+      <p><strong>Cliente:</strong> ${pedido.cliente}</p>
+      <p><strong>Endereço:</strong> ${pedido.endereco}</p>
+      <p><strong>Vendedor:</strong> ${pedido.usuario}</p>
       <div style="margin: 0.5rem 0;">
         <strong>Produtos:</strong>
         ${produtosLista}
       </div>
-      <p><strong>Total:</strong> R$ ${p.total.toFixed(2)}</p>
+      <p><strong>Total:</strong> R$ ${pedido.total.toFixed(2)}</p>
       <p>
         <strong>Status:</strong> 
-        <span class="badge ${p.pagou === "Sim" ? "badge-success" : "badge-danger"}">
-          ${p.pagou}
+        <span class="badge ${pedido.pagou === "Sim" ? "badge-success" : "badge-danger"}">
+          ${pedido.pagou}
         </span>
       </p>
-      <p><strong>Data:</strong> ${p.data}</p>
+      <p><strong>Data:</strong> ${dataFormatada}</p>
+      ${pedido.observacao ? `<p><strong>Observação:</strong> ${pedido.observacao}</p>` : ''}
     `;
     div.appendChild(pedidoCard);
   });
+}
+
+// Função auxiliar para formatar data (se necessário)
+function formatarDataParaExibicao(dataString) {
+  // Se já estiver no formato dd/mm/aaaa, retorna como está
+  if (/\d{2}\/\d{2}\/\d{4}/.test(dataString)) {
+    return dataString;
+  }
+  
+  // Se for um objeto Date ou string ISO, formata
+  try {
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR');
+  } catch (e) {
+    return dataString; // Retorna original se não puder formatar
+  }
 }
 
 // ---- VENDEDOR: PEDIDOS ----
