@@ -1,106 +1,95 @@
 :root {
-  --primary-color: #4361ee;
+  --primary: #4361ee;
   --primary-dark: #3a56d4;
-  --secondary-color: #3f37c9;
-  --success-color: #4cc9f0;
-  --danger-color: #f72585;
-  --light-color: #f8f9fa;
-  --dark-color: #212529;
-  --gray-color: #6c757d;
-  --border-radius: 8px;
+  --secondary: #3f37c9;
+  --success: #4cc9f0;
+  --danger: #f72585;
+  --light: #f8f9fa;
+  --dark: #1a1a1a;
+  --gray: #6c757d;
+  --background: #f5f7fa;
+  --card-bg: #ffffff;
+  --text: #333333;
+  --border-radius: 12px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s ease;
+  --transition: all 0.2s ease;
 }
 
+/* Reset e Base */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: 1.6;
-  background-color: #f5f7fa;
-  color: var(--dark-color);
-  padding: 0;
+  background-color: var(--background);
+  color: var(--text);
   min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-h1, h2, h3, h4 {
-  color: var(--dark-color);
-  margin-bottom: 1rem;
+/* Layout tipo App */
+.app-container {
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--background);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header estilo App */
+.app-header {
+  background: var(--primary);
+  color: white;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-title {
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
-h2 {
-  font-size: 1.75rem;
-}
-
-h3 {
-  font-size: 1.5rem;
-}
-
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-}
-
-/* Formulários */
-label {
-  display: block;
-  margin: 1.25rem 0 0.5rem;
-  font-weight: 500;
-  color: var(--dark-color);
-}
-
-input, select, textarea, button {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ced4da;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  transition: var(--transition);
-}
-
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
-}
-
-button {
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 500;
+.app-header button {
+  background: none;
   border: none;
-  cursor: pointer;
-  transition: var(--transition);
+  color: white;
+  font-size: 1rem;
+  padding: 0.5rem;
 }
 
-button:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-1px);
+/* Container principal */
+.main-content {
+  flex: 1;
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-button:active {
-  transform: translateY(0);
-}
-
-/* Cards e elementos de lista */
+/* Cards estilo App */
 .card {
-  background: white;
+  background: var(--card-bg);
   border-radius: var(--border-radius);
   padding: 1.5rem;
   margin-bottom: 1rem;
@@ -108,32 +97,90 @@ button:active {
   transition: var(--transition);
 }
 
-.card:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.pedido, .produto {
-  composes: card;
-  border-left: 4px solid var(--primary-color);
-}
-
-/* Status */
-.pago {
-  color: #2ecc71;
+.card-header {
   font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.nao-pago {
-  color: var(--danger-color);
-  font-weight: 600;
+/* Formulários */
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background: white;
+  transition: var(--transition);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  font-size: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--gray);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-icon {
+  margin-right: 0.5rem;
 }
 
 /* Listas */
-ul {
+.list {
   list-style: none;
 }
 
-ul li {
+.list-item {
   padding: 1rem;
   border-bottom: 1px solid #eee;
   display: flex;
@@ -141,143 +188,63 @@ ul li {
   align-items: center;
 }
 
-/* Layout */
-hr {
-  margin: 2rem 0;
-  border: 0;
-  border-top: 1px solid #eee;
+/* Status */
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-/* Botões secundários */
-button.secondary {
-  background-color: var(--gray-color);
+.status-paid {
+  background: rgba(76, 201, 240, 0.1);
+  color: var(--success);
 }
 
-button.danger {
-  background-color: var(--danger-color);
+.status-unpaid {
+  background: rgba(247, 37, 133, 0.1);
+  color: var(--danger);
 }
 
-/* Form Section */
-.form-section {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  margin-bottom: 2rem;
-}
-
-/* Produtos */
-#produtos-container {
-  margin-bottom: 1rem;
-}
-
-.produto-nome, .produto-quantidade, .produto-preco {
-  margin-bottom: 0.5rem;
-}
-
-/* Header */
-.page-header {
+/* Navbar inferior (como em apps mobile) */
+.app-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  padding: 0.75rem 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
+  color: var(--gray);
+  text-decoration: none;
+  font-size: 0.75rem;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
-  
-  .container {
-    padding: 1rem;
-    border-radius: 0;
-  }
-  
-  input, select, button {
-    padding: 0.85rem;
-    font-size: 1rem;
-  }
-  
-  button {
-    padding: 1rem;
-  }
-  
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  /* Melhorias para inputs em mobile */
-  input[type="text"],
-  input[type="password"],
-  input[type="number"],
-  input[type="email"],
-  select {
-    min-height: 50px;
-    font-size: 16px !important;
-  }
-  
-  /* Layout de produtos em mobile */
-  .produto-nome, 
-  .produto-quantidade, 
-  .produto-preco {
-    width: 100%;
-    margin-right: 0;
-  }
-  
-  /* Ajuste para botões em listas */
-  ul li {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  ul li button {
-    margin-top: 0.5rem;
-    width: 100%;
-  }
+.nav-item.active {
+  color: var(--primary);
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 0.75rem;
-  }
-  
-  h2 {
-    font-size: 1.5rem;
-  }
-  
-  h3 {
-    font-size: 1.25rem;
-  }
-  
-  /* Ajuste para formulário de produtos */
-  #produtos-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  /* Botões em bloco */
-  button {
-    display: block;
-    margin-bottom: 0.75rem;
-  }
-  
-  /* Pedidos */
-  .pedido {
-    padding: 1rem;
-  }
-  
-  /* Admin */
-  #listaUsuarios li {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  #listaUsuarios button {
-    width: 100%;
-    margin-top: 0.5rem;
-  }
+.nav-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Ajustes para o formulário de produtos */
+.products-container {
+  margin-bottom: 1.5rem;
+}
+
+.product-input-group {
+  margin-bottom: 1rem;
 }
 
 /* Animações */
@@ -286,49 +253,116 @@ button.danger {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.card, .pedido, .produto {
+.fade-in {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Scroll personalizado */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Ajustes para telas maiores */
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  .app-navbar {
+    position: sticky;
+    top: auto;
+    bottom: 0;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+/* Ajustes específicos para cada página */
+#login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 4px;
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
-}
-
-/* Feedback visual para toques */
-button, a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Ajuste para o botão de logout */
-button[onclick="logout()"] {
-  background-color: var(--gray-color);
-  margin-top: 1rem;
-}
-
-/* Estilo para o container de pedidos no admin */
-#todosPedidos {
+/* Estilos específicos para a página de admin */
+.admin-grid {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
-#todosPedidos > div {
-  background: white;
-  padding: 1.5rem;
+@media (min-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Estilo para os cards de pedido na admin */
+.pedido-card {
+  background: var(--card-bg);
   border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+  padding: 1rem;
+  border-left: 4px solid var(--primary);
+}
+
+.pedido-card h4 {
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+}
+
+.pedido-card p {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.pedido-card .produto-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #eee;
+}
+
+/* Estilo para a lista de usuários */
+#listaUsuarios {
+  display: grid;
+  gap: 0.5rem;
+}
+
+#listaUsuarios li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
+}
+
+#listaUsuarios button {
+  padding: 0.5rem 1rem;
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+}
+
+/* Badges para status */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background: rgba(76, 201, 240, 0.1);
+  color: var(--success);
+}
+
+.badge-danger {
+  background: rgba(247, 37, 133, 0.1);
+  color: var(--danger);
 }

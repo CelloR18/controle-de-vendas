@@ -1,37 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Admin - Controle de Vendas</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Admin - App Vendas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4361ee">
 </head>
 <body>
-  <div class="container">
-    <h2>Painel do Administrador</h2>
-    
-    <h3>Cadastrar Novo Usuário</h3>
-    <label>Nome de usuário:</label>
-    <input type="text" id="novoUsuario" />
-    <label>Senha:</label>
-    <input type="password" id="novaSenha" />
-    <button onclick="cadastrarUsuario()">Cadastrar</button>
+  <div class="app-container">
+    <header class="app-header">
+      <h1 class="app-title">Painel Admin</h1>
+      <button onclick="logout()">Sair</button>
+    </header>
 
-    <h3>Usuários Cadastrados</h3>
-    <ul id="listaUsuarios"></ul>
+    <main class="main-content">
+      <section class="fade-in">
+        <div class="card">
+          <h3 class="card-header">Cadastrar Novo Usuário</h3>
+          
+          <div class="input-group">
+            <label>Nome de usuário</label>
+            <input type="text" id="novoUsuario" placeholder="Digite o nome de usuário">
+          </div>
+          
+          <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="novaSenha" placeholder="Digite a senha">
+          </div>
+          
+          <button class="btn btn-primary" onclick="cadastrarUsuario()">Cadastrar Usuário</button>
+        </div>
+      </section>
 
-    <hr />
-    <h3>Todos os Pedidos</h3>
-    <div id="todosPedidos"></div>
+      <section class="fade-in">
+        <div class="card">
+          <h3 class="card-header">Usuários Cadastrados</h3>
+          <ul class="list" id="listaUsuarios"></ul>
+        </div>
+      </section>
 
-    <button onclick="logout()">Sair</button>
+      <section class="fade-in" style="margin-bottom: 4rem;">
+        <div class="card">
+          <h3 class="card-header">Todos os Pedidos</h3>
+          <div id="todosPedidos" style="display: grid; gap: 1rem;"></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="app-navbar">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span>Vendas</span>
+      </a>
+      <a href="admin.html" class="nav-item active">
+        <span class="nav-icon">👤</span>
+        <span>Admin</span>
+      </a>
+      <a href="#" class="nav-item" onclick="logout()">
+        <span class="nav-icon">🔒</span>
+        <span>Sair</span>
+      </a>
+    </nav>
   </div>
 
   <script src="script.js"></script>
- <script>
-  if (verificarAdmin()) {
-    exibirUsuarios();
-    exibirTodosPedidos();
-  }
-</script>
+  <script>
+    if (verificarAdmin()) {
+      exibirUsuarios();
+      exibirTodosPedidos();
+    }
+  </script>
 </body>
 </html>

@@ -1,21 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Login - Controle de Vendas</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Login - App Vendas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4361ee">
 </head>
 <body>
-  <div class="container">
-    <h2>Login</h2>
-
-    <label>Usuário:</label>
-    <input type="text" id="loginUsuario" autocomplete="username" />
-
-    <label>Senha:</label>
-    <input type="password" id="loginSenha" autocomplete="current-password" />
-
-    <button onclick="realizarLogin()">Entrar</button>
+  <div id="login-page">
+    <div class="login-card card fade-in">
+      <h2 style="text-align: center; margin-bottom: 2rem;">Bem-vindo</h2>
+      
+      <div class="input-group">
+        <label for="loginUsuario">Usuário</label>
+        <input type="text" id="loginUsuario" placeholder="Digite seu usuário">
+      </div>
+      
+      <div class="input-group">
+        <label for="loginSenha">Senha</label>
+        <input type="password" id="loginSenha" placeholder="Digite sua senha">
+      </div>
+      
+      <button class="btn btn-primary" onclick="realizarLogin()">Entrar</button>
+    </div>
   </div>
 
   <script src="script.js"></script>

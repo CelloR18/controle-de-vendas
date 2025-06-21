@@ -119,31 +119,40 @@ function exibirTodosPedidos() {
   }
 
   pedidos.forEach((p, i) => {
-    const bloco = document.createElement("div");
-    bloco.style.background = "#f9f9f9";
-    bloco.style.border = "1px solid #ccc";
-    bloco.style.padding = "10px";
-    bloco.style.marginBottom = "10px";
-
-    // Montar lista de produtos detalhada
+    const pedidoCard = document.createElement("div");
+    pedidoCard.className = "pedido-card fade-in";
+    
+    // Montar lista de produtos
     const produtosLista = p.produtos.map(prod => {
-      return `${prod.nome}: ${prod.quantidade}kg x R$${prod.preco.toFixed(2)} = R$${prod.subtotal.toFixed(2)}`;
-    }).join("<br>");
+      return `
+        <div class="produto-item">
+          <strong>${prod.nome}</strong><br>
+          ${prod.quantidade}kg × R$${prod.preco.toFixed(2)} = R$${prod.subtotal.toFixed(2)}
+        </div>
+      `;
+    }).join("");
 
-    bloco.innerHTML = `
-      <strong>Pedido #${i + 1}</strong><br>
-      <strong>Cliente:</strong> ${p.cliente} <br>
-      <strong>Endereço:</strong> ${p.endereco} <br>
-      <strong>Usuário (Vendedor):</strong> ${p.usuario} <br>
-      <strong>Produtos:</strong><br>${produtosLista}<br>
-      <strong>Total:</strong> R$ ${p.total.toFixed(2)}<br>
-      <strong>Status:</strong> ${p.pagou} <br>
-      <strong>Data:</strong> ${p.data}
+    pedidoCard.innerHTML = `
+      <h4>Pedido #${i + 1}</h4>
+      <p><strong>Cliente:</strong> ${p.cliente}</p>
+      <p><strong>Endereço:</strong> ${p.endereco}</p>
+      <p><strong>Vendedor:</strong> ${p.usuario}</p>
+      <div style="margin: 0.5rem 0;">
+        <strong>Produtos:</strong>
+        ${produtosLista}
+      </div>
+      <p><strong>Total:</strong> R$ ${p.total.toFixed(2)}</p>
+      <p>
+        <strong>Status:</strong> 
+        <span class="badge ${p.pagou === "Sim" ? "badge-success" : "badge-danger"}">
+          ${p.pagou}
+        </span>
+      </p>
+      <p><strong>Data:</strong> ${p.data}</p>
     `;
-    div.appendChild(bloco);
+    div.appendChild(pedidoCard);
   });
 }
-
 
 // ---- VENDEDOR: PEDIDOS ----
 
@@ -257,7 +266,7 @@ function exibirHistorico() {
         Endereço: ${pedido.endereco}<br>
         ${produtosHTML}
         <strong>Total: R$ ${pedido.total.toFixed(2)}</strong><br>
-        <span class="${pedido.pagou === "Sim" ? "pago" : "nao-pago"}">Pagou? ${
+        <span class="${pedido.pagou === "Sim" ? "pago" : "nao-pago"}">situação do pagamento: ${
         pedido.pagou
       }</span><br>
         <button onclick="alterarStatus(${pedidos.length - 1 - i})">Alterar Status</button>
@@ -317,21 +326,87 @@ function exportarCSV() {
   const logado = JSON.parse(localStorage.getItem("usuarioLogado"));
   const usuarioAtual = logado.usuario;
 
-  let csv = "Cliente,Endereço,Produtos,Total,Pagou,Data\n";
+  let csv = "\uFEFFCliente;Endereço;Produtos;Total;Pagou;Data\n";
 
   pedidos
     .filter((p) => p.usuario === usuarioAtual)
     .forEach((p) => {
       const produtos = p.produtos
-        .map((pr) => `${pr.nome} (${pr.quantidade}kg x R$${pr.preco})`)
+        .map((pr) => `${pr.nome} (${pr.quantidade}kg x R$${pr.preco.toFixed(2).replace('.', ',')})`)
         .join(" | ");
-      csv += `${p.cliente},${p.endereco},"${produtos}",${p.total},${p.pagou},${p.data}\n`;
+      csv += `"${p.cliente.replace(/"/g, '""')}";"${p.endereco.replace(/"/g, '""')}";"${produtos}";${p.total.toFixed(2).replace('.', ',')};${p.pagou};"${p.data}"\n`;
     });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.setAttribute("href", URL.createObjectURL(blob));
   link.setAttribute("download", "meus_pedidos.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ---- GERAR RELATÓRIO DE VENDAS PAGAS ----
+function gerarRelatorioVendas() {
+  const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+  const logado = JSON.parse(localStorage.getItem("usuarioLogado"));
+  const mesAtual = new Date().getMonth() + 1;
+  const anoAtual = new Date().getFullYear();
+
+  // Filtrar pedidos pagos do mês atual
+  const vendasPagas = pedidos.filter(pedido => {
+    if (pedido.pagou !== "Sim") return false;
+    
+    const [dia, mes, ano] = pedido.data.split('/');
+    const dataPedido = new Date(ano, mes - 1, dia);
+    
+    return dataPedido.getMonth() + 1 === mesAtual && 
+           dataPedido.getFullYear() === anoAtual &&
+           pedido.usuario === logado.usuario;
+  });
+
+  if (vendasPagas.length === 0) {
+    alert("Nenhuma venda paga encontrada neste mês.");
+    return;
+  }
+
+  // Cabeçalho com codificação UTF-8 BOM para Excel
+   let csv = "\uFEFF"; // BOM para UTF-8
+  csv += "Data (dd/mm/aaaa);Cliente;Produto;Quantidade (kg);Preço Unitário;Subtotal\n";
+
+  
+  let totalGeral = 0;
+
+  // Preencher os dados
+  vendasPagas.forEach(pedido => {
+    // Formatar a data para o padrão internacional (aaaa-mm-dd) que o Excel entende melhor
+    const [dia, mes, ano] = pedido.data.split('/');
+    const dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+    
+    pedido.produtos.forEach(produto => {
+      csv += [
+  `"${pedido.data}"`,
+        `"${pedido.cliente.replace(/"/g, '""')}"`,
+        `"${produto.nome.replace(/"/g, '""')}"`,
+        produto.quantidade.toString().replace('.', ','),
+        produto.preco.toFixed(2).replace('.', ','),
+        produto.subtotal.toFixed(2).replace('.', ',')
+      ].join(';') + '\n';
+      
+      totalGeral += produto.subtotal;
+    });
+  });
+
+  // Rodapé com total geral
+    csv += `\n;;;;"Total Geral";"R$ ${totalGeral.toFixed(2).replace('.', ',')}"`;
+
+  // Criar e baixar o arquivo
+   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const nomeArquivo = `vendas_pagas_${mesAtual}_${anoAtual}.csv`;
+  
+  link.setAttribute("href", URL.createObjectURL(blob));
+  link.setAttribute("download", nomeArquivo);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

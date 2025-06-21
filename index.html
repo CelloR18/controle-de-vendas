@@ -1,55 +1,93 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Painel Vendedor - Controle de Vendas</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Painel - App Vendas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4361ee">
 </head>
 <body>
-  <div class="container">
-    <h2>Painel do Vendedor</h2>
-    <button style="float:right; margin-bottom:10px;" onclick="logout()">Sair</button>
+  <div class="app-container">
+    <header class="app-header">
+      <h1 class="app-title">Painel de Vendas</h1>
+      <button onclick="logout()">Sair</button>
+    </header>
 
-    <section class="form-section">
-      <h3>Novo Pedido</h3>
+    <main class="main-content">
+      <section class="fade-in">
+        <div class="card">
+          <h3 class="card-header">Novo Pedido</h3>
+          
+          <div class="input-group">
+            <label>Cliente</label>
+            <input type="text" id="cliente" placeholder="Nome do cliente">
+          </div>
+          
+          <div class="input-group">
+            <label>Endereço</label>
+            <input type="text" id="endereco" placeholder="Endereço completo">
+          </div>
+          
+          <div class="products-container" id="produtos-container">
+            <div class="product-input-group">
+              <label>Produto 1</label>
+              <input type="text" class="produto-nome" placeholder="Nome do produto">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                <input type="number" class="produto-quantidade" placeholder="Quantidade (kg)" step="0.01">
+                <input type="number" class="produto-preco" placeholder="Preço (R$/kg)" step="0.01">
+              </div>
+            </div>
+          </div>
+          
+          <button class="btn btn-secondary" onclick="adicionarProduto()" style="margin-bottom: 1.5rem;">
+            + Adicionar Produto
+          </button>
+          
+          <div class="input-group">
+            <label>Situação</label>
+            <select id="pagou">
+              <option value="Não">Não pago</option>
+              <option value="Sim">Pago</option>
+            </select>
+          </div>
+          
+          <button class="btn btn-primary" onclick="salvarPedido()">Salvar Pedido</button>
+        </div>
+      </section>
 
-      <label>Cliente:</label>
-      <input type="text" id="cliente" required />
+      <section class="fade-in" style="margin-bottom: 4rem;">
+        <div class="card">
+          <h3 class="card-header">Meus Pedidos</h3>
+          
+          <div class="input-group">
+            <input type="text" id="buscaCliente" placeholder="Buscar por cliente..." oninput="exibirHistorico()">
+          </div>
+          
+          <button class="btn btn-primary" onclick="gerarRelatorioVendas()" style="margin-bottom: 1.5rem;">
+            Relatório de Vendas
+          </button>
+          
+          <div id="historico"></div>
+        </div>
+      </section>
+    </main>
 
-      <label>Endereço:</label>
-      <input type="text" id="endereco" required />
-
-      <div id="produtos-container">
-        <label>Produto 1:</label>
-        <input type="text" class="produto-nome" placeholder="Nome do Produto" />
-        <input type="number" class="produto-quantidade" placeholder="Quantidade (kg)" step="0.01" />
-        <input type="number" class="produto-preco" placeholder="Preço por kg (R$)" step="0.01" />
-      </div>
-
-      <button type="button" onclick="adicionarProduto()">+ Adicionar Produto</button>
-
-      <label>Pagou?</label>
-      <select id="pagou">
-        <option value="Sim">Sim</option>
-        <option value="Não" selected>Não</option>
-      </select>
-
-      <button onclick="salvarPedido()">Salvar Pedido</button>
-      <button onclick="exportarCSV()">Exportar Pedidos</button>
-    </section>
-
-    <hr />
-
-    <section>
-      <h3>Meus Pedidos</h3>
-      <input
-        type="text"
-        id="buscaCliente"
-        placeholder="Buscar por cliente..."
-        oninput="exibirHistorico()"
-      />
-      <div id="historico"></div>
-    </section>
+    <nav class="app-navbar">
+      <a href="index.html" class="nav-item active">
+        <span class="nav-icon">📋</span>
+        <span>Pedidos</span>
+      </a>
+      <a href="#" class="nav-item" onclick="exportarCSV()">
+        <span class="nav-icon">📊</span>
+        <span>Relatórios</span>
+      </a>
+      <a href="#" class="nav-item" onclick="logout()">
+        <span class="nav-icon">🔒</span>
+        <span>Sair</span>
+      </a>
+    </nav>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
