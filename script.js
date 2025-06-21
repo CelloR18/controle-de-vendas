@@ -368,22 +368,52 @@ function exportarCSV() {
   document.body.removeChild(link);
 }
 
-// ---- GERAR RELATÓRIO DE VENDAS PAGAS ----
-function gerarRelatorioVendas() {
+// ---- GERAR RELATÓRIO DE VENDAS PAGAS EM PDF COM TABELA ----
+async function gerarRelatorioVendas() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
   const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
   const logado = JSON.parse(localStorage.getItem("usuarioLogado"));
   const mesAtual = new Date().getMonth() + 1;
   const anoAtual = new Date().getFullYear();
+  const nomeMes = new Date().toLocaleString('pt-BR', { month: 'long' });
 
-  // Filtrar pedidos pagos do mês atual
+  // Configurações do PDF
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0, 0, 0);
+
+  // Cabeçalho
+  doc.setFontSize(18);
+  doc.text("Relatório de Vendas Pagas", 105, 20, { align: "center" });
+  
+  doc.setFontSize(12);
+  doc.text(`Mês: ${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}/${anoAtual}`, 105, 30, { align: "center" });
+  doc.text(`Emitido por: ${logado.usuario}`, 105, 36, { align: "center" });
+  
+  // Linha divisória
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, 42, 190, 42);
+
+  // Configurações da tabela
+  const columns = [
+    { header: "Data", dataKey: "data", width: 25 },
+    { header: "Cliente", dataKey: "cliente", width: 40 },
+    { header: "Produtos", dataKey: "produtos", width: 80 },
+    { header: "Valor (R$)", dataKey: "total", width: 25 }
+  ];
+
+  // Preparar dados para a tabela
+  const tableData = [];
+  let totalGeral = 0;
+
+  // Filtrar e processar pedidos pagos do mês atual
   const vendasPagas = pedidos.filter(pedido => {
     if (pedido.pagou !== "Sim") return false;
     
     const [dia, mes, ano] = pedido.data.split('/');
-    const dataPedido = new Date(ano, mes - 1, dia);
-    
-    return dataPedido.getMonth() + 1 === mesAtual && 
-           dataPedido.getFullYear() === anoAtual &&
+    return parseInt(mes) === mesAtual && 
+           parseInt(ano) === anoAtual &&
            pedido.usuario === logado.usuario;
   });
 
@@ -392,44 +422,80 @@ function gerarRelatorioVendas() {
     return;
   }
 
-  // Cabeçalho com codificação UTF-8 BOM para Excel
-   let csv = "\uFEFF"; // BOM para UTF-8
-  csv += "Data (dd/mm/aaaa);Cliente;Produto;Quantidade (kg);Preço Unitário;Subtotal\n";
-
-  
-  let totalGeral = 0;
-
-  // Preencher os dados
-  vendasPagas.forEach(pedido => {
-    // Formatar a data para o padrão internacional (aaaa-mm-dd) que o Excel entende melhor
-    const [dia, mes, ano] = pedido.data.split('/');
-    const dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-    
-    pedido.produtos.forEach(produto => {
-      csv += [
-  `"${pedido.data}"`,
-        `"${pedido.cliente.replace(/"/g, '""')}"`,
-        `"${produto.nome.replace(/"/g, '""')}"`,
-        produto.quantidade.toString().replace('.', ','),
-        produto.preco.toFixed(2).replace('.', ','),
-        produto.subtotal.toFixed(2).replace('.', ',')
-      ].join(';') + '\n';
-      
-      totalGeral += produto.subtotal;
-    });
+  // Ordenar por data
+  vendasPagas.sort((a, b) => {
+    const [diaA, mesA, anoA] = a.data.split('/');
+    const [diaB, mesB, anoB] = b.data.split('/');
+    return new Date(anoA, mesA - 1, diaA) - new Date(anoB, mesB - 1, diaB);
   });
 
-  // Rodapé com total geral
-    csv += `\n;;;;"Total Geral";"R$ ${totalGeral.toFixed(2).replace('.', ',')}"`;
+  // Formatador de produtos para caber na célula
+  const formatarProdutos = (produtos) => {
+    return produtos.map(p => 
+      `${p.nome} (${p.quantidade}kg × R$${p.preco.toFixed(2)})`
+    ).join('\n');
+  };
 
-  // Criar e baixar o arquivo
-   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const nomeArquivo = `vendas_pagas_${mesAtual}_${anoAtual}.csv`;
+  // Preencher dados da tabela
+  vendasPagas.forEach(pedido => {
+    tableData.push({
+      data: pedido.data,
+      cliente: pedido.cliente.length > 20 ? pedido.cliente.substring(0, 17) + '...' : pedido.cliente,
+      produtos: formatarProdutos(pedido.produtos),
+      total: pedido.total.toFixed(2)
+    });
+    totalGeral += pedido.total;
+  });
+
+  // Adicionar tabela ao PDF
+  doc.autoTable({
+    startY: 45,
+    head: [columns.map(col => col.header)],
+    body: tableData.map(row => columns.map(col => row[col.dataKey])),
+    columnStyles: columns.reduce((styles, col) => {
+      styles[col.header] = { cellWidth: col.width };
+      return styles;
+    }, {}),
+    headStyles: {
+      fillColor: [67, 97, 238], // Cor azul do tema
+      textColor: 255,
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240]
+    },
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+      overflow: 'linebreak',
+      halign: 'left',
+      valign: 'middle'
+    },
+    didDrawPage: function(data) {
+      // Rodapé em cada página
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(
+        `Página ${data.pageNumber}`,
+        data.settings.margin.left,
+        doc.internal.pageSize.height - 10
+      );
+    }
+  });
+
+  // Total geral (posiciona após a tabela)
+  const finalY = doc.lastAutoTable.finalY || 100;
   
-  link.setAttribute("href", URL.createObjectURL(blob));
-  link.setAttribute("download", nomeArquivo);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Total:", 130, finalY + 15);
+  doc.text(`R$ ${totalGeral.toFixed(2)}`, 170, finalY + 15, { align: "right" });
+
+  // Rodapé
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
+  doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 285, { align: "center" });
+
+  // Salvar PDF
+  doc.save(`relatorio_vendas_${nomeMes}_${anoAtual}.pdf`);
 }
