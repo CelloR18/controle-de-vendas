@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Painel Vendedor - Controle de Vendas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Painel do Vendedor</h2>
+    <button style="float:right; margin-bottom:10px;" onclick="logout()">Sair</button>
+
+    <section class="form-section">
+      <h3>Novo Pedido</h3>
+
+      <label>Cliente:</label>
+      <input type="text" id="cliente" required />
+
+      <label>Endereço:</label>
+      <input type="text" id="endereco" required />
+
+      <div id="produtos-container">
+        <label>Produto 1:</label>
+        <input type="text" class="produto-nome" placeholder="Nome do Produto" />
+        <input type="number" class="produto-quantidade" placeholder="Quantidade (kg)" step="0.01" />
+        <input type="number" class="produto-preco" placeholder="Preço por kg (R$)" step="0.01" />
+      </div>
+
+      <button type="button" onclick="adicionarProduto()">+ Adicionar Produto</button>
+
+      <label>Pagou?</label>
+      <select id="pagou">
+        <option value="Sim">Sim</option>
+        <option value="Não" selected>Não</option>
+      </select>
+
+      <button onclick="salvarPedido()">Salvar Pedido</button>
+      <button onclick="exportarCSV()">Exportar Pedidos</button>
+    </section>
+
+    <hr />
+
+    <section>
+      <h3>Meus Pedidos</h3>
+      <input
+        type="text"
+        id="buscaCliente"
+        placeholder="Buscar por cliente..."
+        oninput="exibirHistorico()"
+      />
+      <div id="historico"></div>
+    </section>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if (verificarUsuario()) {
+      exibirHistorico();
+    }
+  </script>
+</body>
+</html>

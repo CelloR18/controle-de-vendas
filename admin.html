@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Controle de Vendas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Painel do Administrador</h2>
+    
+    <h3>Cadastrar Novo Usuário</h3>
+    <label>Nome de usuário:</label>
+    <input type="text" id="novoUsuario" />
+    <label>Senha:</label>
+    <input type="password" id="novaSenha" />
+    <button onclick="cadastrarUsuario()">Cadastrar</button>
+
+    <h3>Usuários Cadastrados</h3>
+    <ul id="listaUsuarios"></ul>
+
+    <hr />
+    <h3>Todos os Pedidos</h3>
+    <div id="todosPedidos"></div>
+
+    <button onclick="logout()">Sair</button>
+  </div>
+
+  <script src="script.js"></script>
+ <script>
+  if (verificarAdmin()) {
+    exibirUsuarios();
+    exibirTodosPedidos();
+  }
+</script>
+</body>
+</html>
