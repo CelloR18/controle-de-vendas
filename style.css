@@ -1,32 +1,334 @@
-/* Evitar zoom em inputs no iOS */
-@media (max-width: 600px) {
-  input[type="color"],
-  input[type="date"],
-  input[type="datetime"],
-  input[type="datetime-local"],
-  input[type="email"],
-  input[type="month"],
-  input[type="number"],
-  input[type="password"],
-  input[type="search"],
-  input[type="tel"],
+:root {
+  --primary-color: #4361ee;
+  --primary-dark: #3a56d4;
+  --secondary-color: #3f37c9;
+  --success-color: #4cc9f0;
+  --danger-color: #f72585;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+  --gray-color: #6c757d;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background-color: #f5f7fa;
+  color: var(--dark-color);
+  padding: 0;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  color: var(--dark-color);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.75rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+/* Formulários */
+label {
+  display: block;
+  margin: 1.25rem 0 0.5rem;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+input, select, textarea, button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Cards e elementos de lista */
+.card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pedido, .produto {
+  composes: card;
+  border-left: 4px solid var(--primary-color);
+}
+
+/* Status */
+.pago {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.nao-pago {
+  color: var(--danger-color);
+  font-weight: 600;
+}
+
+/* Listas */
+ul {
+  list-style: none;
+}
+
+ul li {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Layout */
+hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+/* Botões secundários */
+button.secondary {
+  background-color: var(--gray-color);
+}
+
+button.danger {
+  background-color: var(--danger-color);
+}
+
+/* Form Section */
+.form-section {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 2rem;
+}
+
+/* Produtos */
+#produtos-container {
+  margin-bottom: 1rem;
+}
+
+.produto-nome, .produto-quantidade, .produto-preco {
+  margin-bottom: 0.5rem;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 1rem;
+    border-radius: 0;
+  }
+  
+  input, select, button {
+    padding: 0.85rem;
+    font-size: 1rem;
+  }
+  
+  button {
+    padding: 1rem;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  /* Melhorias para inputs em mobile */
   input[type="text"],
-  input[type="time"],
-  input[type="url"],
-  input[type="week"],
-  select:focus,
-  textarea {
+  input[type="password"],
+  input[type="number"],
+  input[type="email"],
+  select {
+    min-height: 50px;
     font-size: 16px !important;
+  }
+  
+  /* Layout de produtos em mobile */
+  .produto-nome, 
+  .produto-quantidade, 
+  .produto-preco {
+    width: 100%;
+    margin-right: 0;
+  }
+  
+  /* Ajuste para botões em listas */
+  ul li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  ul li button {
+    margin-top: 0.5rem;
+    width: 100%;
   }
 }
 
-/* Feedback visual ao tocar em botões */
-button:active {
-  transform: scale(0.98);
-  opacity: 0.9;
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  /* Ajuste para formulário de produtos */
+  #produtos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Botões em bloco */
+  button {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Pedidos */
+  .pedido {
+    padding: 1rem;
+  }
+  
+  /* Admin */
+  #listaUsuarios li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  #listaUsuarios button {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
 }
 
-/* Espaçamento maior entre seções */
-section {
-  margin-bottom: 30px;
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .pedido, .produto {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Scroll personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Feedback visual para toques */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ajuste para o botão de logout */
+button[onclick="logout()"] {
+  background-color: var(--gray-color);
+  margin-top: 1rem;
+}
+
+/* Estilo para o container de pedidos no admin */
+#todosPedidos {
+  display: grid;
+  gap: 1rem;
+}
+
+#todosPedidos > div {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
 }
