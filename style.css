@@ -13,6 +13,7 @@
   --border-radius: 12px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --transition: all 0.2s ease;
+  
 }
 
 /* Reset e Base */
@@ -21,6 +22,11 @@
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+}
+body{
+  background-image: url("./images.jpg");
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  background-size: cover; /* Ajusta a imagem para cobrir todo o corpo */
 }
 
 html {
@@ -381,4 +387,40 @@ input:focus, select:focus, textarea:focus {
 .btn-report::before {
   content: "📊";
   font-size: 1.2em;
+}
+/* Adicione ao style.css */
+.relatorio-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.relatorio-table th, .relatorio-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.relatorio-table th {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 500;
+}
+
+.relatorio-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.relatorio-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.status-paid {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.status-unpaid {
+  color: var(--danger);
+  font-weight: 500;
 }

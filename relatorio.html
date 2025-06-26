@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Relatórios - App Vendas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4361ee">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1 class="app-title">Relatório de Vendas</h1>
+      <button onclick="window.history.back()">Voltar</button>
+    </header>
+
+    <main class="main-content">
+      <section class="fade-in">
+        <div class="card">
+          <h3 class="card-header">Filtrar Relatório</h3>
+          
+          <div class="input-group">
+            <label>Período Inicial</label>
+            <input type="date" id="dataInicio">
+          </div>
+          
+          <div class="input-group">
+            <label>Período Final</label>
+            <input type="date" id="dataFim">
+          </div>
+          
+          <div class="input-group">
+            <label>Vendedor</label>
+            <select id="vendedor">
+              <option value="todos">Todos os Vendedores</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label>Status</label>
+            <select id="status">
+              <option value="todos">Todos</option>
+              <option value="Sim">Pagas</option>
+              <option value="Não">Não Pagas</option>
+            </select>
+          </div>
+          
+          <button class="btn btn-primary" onclick="gerarRelatorio()">Gerar Relatório</button>
+        </div>
+      </section>
+
+      <section class="fade-in" style="margin-bottom: 4rem;">
+        <div class="card">
+          <h3 class="card-header">Resultados</h3>
+          <div id="relatorioResultados"></div>
+          <div id="totalRelatorio" style="margin-top: 1rem; font-weight: bold; text-align: right;"></div>
+          <button class="btn btn-report" onclick="exportarRelatorioPDF()" style="margin-top: 1rem;">
+            Exportar para PDF
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="app-navbar">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span>Vendas</span>
+      </a>
+      <a href="admin.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span>Admin</span>
+      </a>
+      <a href="relatorio.html" class="nav-item active">
+        <span class="nav-icon">📊</span>
+        <span>Relatórios</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    if (verificarAdmin()) {
+      carregarVendedores();
+      // Definir datas padrão (mês atual)
+      const hoje = new Date();
+      const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      
+      document.getElementById('dataInicio').valueAsDate = primeiroDia;
+      document.getElementById('dataFim').valueAsDate = hoje;
+      
+      // Gerar relatório inicial
+      setTimeout(() => gerarRelatorio(), 500);
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</body>
+</html>

@@ -108,7 +108,6 @@ function removerUsuario(nome) {
 }
 
 // ---- ADMIN: EXIBIR TODOS PEDIDOS ----
-// ---- ADMIN: EXIBIR TODOS PEDIDOS ----
 function exibirTodosPedidos() {
   const div = document.getElementById("todosPedidos");
   const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
@@ -160,19 +159,270 @@ function exibirTodosPedidos() {
   });
 }
 
-// Função auxiliar para formatar data (se necessário)
+// ---- ADMIN: CARREGAR VENDEDORES ----
+function carregarVendedores() {
+  const select = document.getElementById('vendedor');
+  const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+  
+  // Limpar opções exceto a primeira
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  
+  // Adicionar vendedores (usuários comuns)
+  usuarios.filter(u => u.tipo === 'usuario').forEach(u => {
+    const option = document.createElement('option');
+    option.value = u.usuario;
+    option.textContent = u.usuario;
+    select.appendChild(option);
+  });
+}
+
+// ---- ADMIN: GERAR RELATÓRIO ----
+function gerarRelatorio() {
+  const dataInicio = document.getElementById('dataInicio').value;
+  const dataFim = document.getElementById('dataFim').value;
+  const vendedor = document.getElementById('vendedor').value;
+  const status = document.getElementById('status').value;
+  
+  if (!dataInicio || !dataFim) {
+    alert('Selecione um período válido');
+    return;
+  }
+  
+  const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+  const resultadosDiv = document.getElementById('relatorioResultados');
+  const totalDiv = document.getElementById('totalRelatorio');
+  
+  resultadosDiv.innerHTML = '';
+  totalDiv.innerHTML = '';
+  
+  // Converter datas para comparar
+  const inicio = new Date(dataInicio);
+  const fim = new Date(dataFim);
+  fim.setHours(23, 59, 59, 999); // Incluir todo o dia final
+  
+  let totalGeral = 0;
+  let html = `
+    <table class="relatorio-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Vendedor</th>
+          <th>Cliente</th>
+          <th>Produtos</th>
+          <th>Valor</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  // Ordenar pedidos do mais recente para o mais antigo
+  const pedidosOrdenados = [...pedidos].reverse();
+  
+  pedidosOrdenados.forEach(pedido => {
+    // Converter data do pedido para comparar
+    const [dia, mes, ano] = pedido.data.split('/');
+    const dataPedido = new Date(ano, mes - 1, dia);
+    
+    // Filtrar por período
+    if (dataPedido < inicio || dataPedido > fim) return;
+    
+    // Filtrar por vendedor
+    if (vendedor !== 'todos' && pedido.usuario !== vendedor) return;
+    
+    // Filtrar por status
+    if (status !== 'todos' && pedido.pagou !== status) return;
+    
+    // Formatar produtos
+    const produtos = pedido.produtos.map(p => 
+      `${p.nome} (${p.quantidade}kg × R$${p.preco.toFixed(2)})`
+    ).join('<br>');
+    
+    // Adicionar ao relatório
+    html += `
+      <tr>
+        <td>${pedido.data}</td>
+        <td>${pedido.usuario}</td>
+        <td>${pedido.cliente}</td>
+        <td>${produtos}</td>
+        <td>R$ ${pedido.total.toFixed(2)}</td>
+        <td class="${pedido.pagou === 'Sim' ? 'status-paid' : 'status-unpaid'}">${pedido.pagou}</td>
+      </tr>
+    `;
+    
+    totalGeral += pedido.total;
+  });
+  
+  html += `
+      </tbody>
+    </table>
+  `;
+  
+  if (totalGeral === 0) {
+    resultadosDiv.innerHTML = '<p>Nenhum pedido encontrado com os filtros selecionados.</p>';
+  } else {
+    resultadosDiv.innerHTML = html;
+    totalDiv.innerHTML = `Total: R$ ${totalGeral.toFixed(2)}`;
+  }
+}
+
+// ---- ADMIN: EXPORTAR RELATÓRIO PDF ----
+function exportarRelatorioPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  const dataInicio = document.getElementById('dataInicio').value;
+  const dataFim = document.getElementById('dataFim').value;
+  const vendedor = document.getElementById('vendedor').value;
+  const status = document.getElementById('status').value;
+  
+  // Configurações do PDF
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0, 0, 0);
+  
+  // Cabeçalho
+  doc.setFontSize(18);
+  doc.text("Relatório de Vendas", 105, 20, { align: "center" });
+  
+  // Informações do filtro
+  doc.setFontSize(12);
+  doc.text(`Período: ${formatarDataParaExibicao(dataInicio)} à ${formatarDataParaExibicao(dataFim)}`, 105, 30, { align: "center" });
+  
+  if (vendedor !== 'todos') {
+    doc.text(`Vendedor: ${vendedor}`, 105, 36, { align: "center" });
+  }
+  
+  if (status !== 'todos') {
+    doc.text(`Status: ${status === 'Sim' ? 'Pagas' : 'Não Pagas'}`, 105, 42, { align: "center" });
+  }
+  
+  // Linha divisória
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, 48, 190, 48);
+  
+  // Configurações da tabela
+  const columns = [
+    { header: "Data", dataKey: "data", width: 25 },
+    { header: "Vendedor", dataKey: "vendedor", width: 30 },
+    { header: "Cliente", dataKey: "cliente", width: 40 },
+    { header: "Produtos", dataKey: "produtos", width: 60 },
+    { header: "Valor (R$)", dataKey: "valor", width: 25 },
+    { header: "Status", dataKey: "status", width: 20 }
+  ];
+  
+  // Preparar dados para a tabela
+  const tableData = [];
+  let totalGeral = 0;
+  
+  const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+  const inicio = new Date(dataInicio);
+  const fim = new Date(dataFim);
+  fim.setHours(23, 59, 59, 999);
+  
+  // Ordenar pedidos do mais recente para o mais antigo
+  const pedidosOrdenados = [...pedidos].reverse();
+  
+  pedidosOrdenados.forEach(pedido => {
+    const [dia, mes, ano] = pedido.data.split('/');
+    const dataPedido = new Date(ano, mes - 1, dia);
+    
+    // Aplicar filtros
+    if (dataPedido < inicio || dataPedido > fim) return;
+    if (vendedor !== 'todos' && pedido.usuario !== vendedor) return;
+    if (status !== 'todos' && pedido.pagou !== status) return;
+    
+    // Formatador de produtos para caber na célula
+    const produtos = pedido.produtos.map(p => 
+      `${p.nome} (${p.quantidade}kg × R$${p.preco.toFixed(2)})`
+    ).join('\n');
+    
+    tableData.push({
+      data: pedido.data,
+      vendedor: pedido.usuario,
+      cliente: pedido.cliente.length > 20 ? pedido.cliente.substring(0, 17) + '...' : pedido.cliente,
+      produtos: produtos,
+      valor: pedido.total.toFixed(2),
+      status: pedido.pagou
+    });
+    
+    totalGeral += pedido.total;
+  });
+  
+  if (tableData.length === 0) {
+    alert('Nenhum dado para exportar com os filtros selecionados.');
+    return;
+  }
+  
+  // Adicionar tabela ao PDF
+  doc.autoTable({
+    startY: 50,
+    head: [columns.map(col => col.header)],
+    body: tableData.map(row => columns.map(col => row[col.dataKey])),
+    columnStyles: columns.reduce((styles, col) => {
+      styles[col.header] = { cellWidth: col.width };
+      return styles;
+    }, {}),
+    headStyles: {
+      fillColor: [67, 97, 238], // Cor azul do tema
+      textColor: 255,
+      fontStyle: 'bold'
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240]
+    },
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      overflow: 'linebreak',
+      halign: 'left',
+      valign: 'middle'
+    },
+    didDrawPage: function(data) {
+      // Rodapé em cada página
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(
+        `Página ${data.pageNumber}`,
+        data.settings.margin.left,
+        doc.internal.pageSize.height - 10
+      );
+    }
+  });
+  
+  // Total geral (posiciona após a tabela)
+  const finalY = doc.lastAutoTable.finalY || 100;
+  
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Total:", 130, finalY + 15);
+  doc.text(`R$ ${totalGeral.toFixed(2)}`, 170, finalY + 15, { align: "right" });
+  
+  // Rodapé
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
+  doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 285, { align: "center" });
+  
+  // Salvar PDF
+  const nomeArquivo = `relatorio_vendas_${formatarDataParaExibicao(dataInicio)}_a_${formatarDataParaExibicao(dataFim)}.pdf`;
+  doc.save(nomeArquivo);
+}
+
+// Função auxiliar para formatar data ISO para exibição
 function formatarDataParaExibicao(dataString) {
+  if (!dataString) return '';
+  
   // Se já estiver no formato dd/mm/aaaa, retorna como está
   if (/\d{2}\/\d{2}\/\d{4}/.test(dataString)) {
     return dataString;
   }
   
-  // Se for um objeto Date ou string ISO, formata
   try {
     const data = new Date(dataString);
     return data.toLocaleDateString('pt-BR');
   } catch (e) {
-    return dataString; // Retorna original se não puder formatar
+    return dataString;
   }
 }
 
@@ -366,136 +616,4 @@ function exportarCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-}
-
-// ---- GERAR RELATÓRIO DE VENDAS PAGAS EM PDF COM TABELA ----
-async function gerarRelatorioVendas() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
-  const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
-  const logado = JSON.parse(localStorage.getItem("usuarioLogado"));
-  const mesAtual = new Date().getMonth() + 1;
-  const anoAtual = new Date().getFullYear();
-  const nomeMes = new Date().toLocaleString('pt-BR', { month: 'long' });
-
-  // Configurações do PDF
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(0, 0, 0);
-
-  // Cabeçalho
-  doc.setFontSize(18);
-  doc.text("Relatório de Vendas Pagas", 105, 20, { align: "center" });
-  
-  doc.setFontSize(12);
-  doc.text(`Mês: ${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}/${anoAtual}`, 105, 30, { align: "center" });
-  doc.text(`Emitido por: ${logado.usuario}`, 105, 36, { align: "center" });
-  
-  // Linha divisória
-  doc.setDrawColor(200, 200, 200);
-  doc.line(20, 42, 190, 42);
-
-  // Configurações da tabela
-  const columns = [
-    { header: "Data", dataKey: "data", width: 25 },
-    { header: "Cliente", dataKey: "cliente", width: 40 },
-    { header: "Produtos", dataKey: "produtos", width: 80 },
-    { header: "Valor (R$)", dataKey: "total", width: 25 }
-  ];
-
-  // Preparar dados para a tabela
-  const tableData = [];
-  let totalGeral = 0;
-
-  // Filtrar e processar pedidos pagos do mês atual
-  const vendasPagas = pedidos.filter(pedido => {
-    if (pedido.pagou !== "Sim") return false;
-    
-    const [dia, mes, ano] = pedido.data.split('/');
-    return parseInt(mes) === mesAtual && 
-           parseInt(ano) === anoAtual &&
-           pedido.usuario === logado.usuario;
-  });
-
-  if (vendasPagas.length === 0) {
-    alert("Nenhuma venda paga encontrada neste mês.");
-    return;
-  }
-
-  // Ordenar por data
-  vendasPagas.sort((a, b) => {
-    const [diaA, mesA, anoA] = a.data.split('/');
-    const [diaB, mesB, anoB] = b.data.split('/');
-    return new Date(anoA, mesA - 1, diaA) - new Date(anoB, mesB - 1, diaB);
-  });
-
-  // Formatador de produtos para caber na célula
-  const formatarProdutos = (produtos) => {
-    return produtos.map(p => 
-      `${p.nome} (${p.quantidade}kg × R$${p.preco.toFixed(2)})`
-    ).join('\n');
-  };
-
-  // Preencher dados da tabela
-  vendasPagas.forEach(pedido => {
-    tableData.push({
-      data: pedido.data,
-      cliente: pedido.cliente.length > 20 ? pedido.cliente.substring(0, 17) + '...' : pedido.cliente,
-      produtos: formatarProdutos(pedido.produtos),
-      total: pedido.total.toFixed(2)
-    });
-    totalGeral += pedido.total;
-  });
-
-  // Adicionar tabela ao PDF
-  doc.autoTable({
-    startY: 45,
-    head: [columns.map(col => col.header)],
-    body: tableData.map(row => columns.map(col => row[col.dataKey])),
-    columnStyles: columns.reduce((styles, col) => {
-      styles[col.header] = { cellWidth: col.width };
-      return styles;
-    }, {}),
-    headStyles: {
-      fillColor: [67, 97, 238], // Cor azul do tema
-      textColor: 255,
-      fontStyle: 'bold'
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240]
-    },
-    styles: {
-      fontSize: 9,
-      cellPadding: 3,
-      overflow: 'linebreak',
-      halign: 'left',
-      valign: 'middle'
-    },
-    didDrawPage: function(data) {
-      // Rodapé em cada página
-      doc.setFontSize(10);
-      doc.setTextColor(100);
-      doc.text(
-        `Página ${data.pageNumber}`,
-        data.settings.margin.left,
-        doc.internal.pageSize.height - 10
-      );
-    }
-  });
-
-  // Total geral (posiciona após a tabela)
-  const finalY = doc.lastAutoTable.finalY || 100;
-  
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Total:", 130, finalY + 15);
-  doc.text(`R$ ${totalGeral.toFixed(2)}`, 170, finalY + 15, { align: "right" });
-
-  // Rodapé
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "italic");
-  doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 285, { align: "center" });
-
-  // Salvar PDF
-  doc.save(`relatorio_vendas_${nomeMes}_${anoAtual}.pdf`);
 }
