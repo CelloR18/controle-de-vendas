@@ -260,13 +260,18 @@ function gerarRelatorio() {
     </table>
   `;
   
-  if (totalGeral === 0) {
+   if (totalGeral === 0) {
     resultadosDiv.innerHTML = '<p>Nenhum pedido encontrado com os filtros selecionados.</p>';
   } else {
-    resultadosDiv.innerHTML = html;
+    resultadosDiv.innerHTML = `
+      <div class="table-container">
+        ${html}
+      </div>
+    `;
     totalDiv.innerHTML = `Total: R$ ${totalGeral.toFixed(2)}`;
   }
 }
+
 
 // ---- ADMIN: EXPORTAR RELATÓRIO PDF ----
 function exportarRelatorioPDF() {
